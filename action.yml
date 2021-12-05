@@ -33,7 +33,7 @@ runs:
         images: ${{ steps.ecr.outputs.registry }}/${{ inputs.image-name }}
         tags: |
           type=ref,event=branch
-          type=sha
+          type=sha,format=long
 
     - name: Build Image
       uses: docker/build-push-action@v2
