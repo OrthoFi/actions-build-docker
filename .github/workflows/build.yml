@@ -1,0 +1,68 @@
+name: Build Image
+on:
+  workflow_call:
+    inputs:
+      context:
+        description: Docker Context
+        default: .
+        required: true
+        type: string
+      dockerfile:
+        description: Dockerfile location
+        default: Dockerfile
+        required: true
+        type: string
+      image-name:
+        description: Name of the published image
+        required: true
+        type: string
+
+    secrets:
+      build-aws-access-key-id:
+        description: secrets.BUILD_AWS_ACCESS_KEY_ID
+        required: true
+      build-aws-secret-access-key:
+        description: secrets.BUILD_AWS_SECRET_ACCESS_KEY
+        required: true
+      github-token:
+        description: secrets.BUILD_GITHUB_TOKEN
+        required: true
+      ockers-build-role:
+        description: secrets.OCKERS_BUILD_ROLE
+        required: true
+
+jobs:
+  build-image:
+    name: Build Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.build-aws-access-key-id }}
+          aws-region: us-east-1
+          aws-secret-access-key: ${{ secrets.build-aws-secret-access-key }}
+          role-to-assume: ${{ secrets.ockers-build-role }}
+
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: ecr
+
+      - uses: docker/metadata-action@v3
+        id: meta
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.image-name }}
+          tags: |
+            type=ref,event=branch
+            type=sha,format=long
+
+      - uses: docker/build-push-action@v2
+        with:
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.github-token }}
+            GITHUB_USERNAME=OrthoFi
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
