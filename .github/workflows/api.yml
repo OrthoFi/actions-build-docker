@@ -1,0 +1,82 @@
+name: Build Api
+on:
+  workflow_call:
+    inputs:
+      context:
+        description: Docker Context
+        default: .
+        required: false
+        type: string
+
+      dockerfile:
+        description: Dockerfile location
+        default: ./Api/Dockerfile
+        required: false
+        type: string
+
+      domain:
+        description: Domain for the api
+        required: true
+        type: string
+
+    secrets:
+      build-aws-access-key-id:
+        description: secrets.BUILD_AWS_ACCESS_KEY_ID
+        required: true
+
+      build-aws-secret-access-key:
+        description: secrets.BUILD_AWS_SECRET_ACCESS_KEY
+        required: true
+
+      dev-build-role:
+        description: secrets.OCKERS_BUILD_ROLE
+        required: true
+
+      github-token:
+        description: secrets.BUILD_GITHUB_TOKEN
+        required: true
+
+jobs:
+  build-image:
+    name: Build Image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - runtime-tag: 6.0-alpine3.16-arm64v8
+            suffix: "-arm"
+
+          - runtime-tag: "6.0"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.build-aws-access-key-id }}
+          aws-region: us-east-1
+          aws-secret-access-key: ${{ secrets.build-aws-secret-access-key }}
+          role-to-assume: ${{ secrets.dev-build-role }}
+
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: ecr
+
+      - uses: docker/metadata-action@v4
+        id: meta
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.domain }}-api
+          tags: |
+            type=ref,event=branch,suffix=${{ matrix.suffix }}
+            type=sha,format=long
+
+      - uses: docker/build-push-action@v3
+        with:
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.github-token }}
+            GITHUB_USERNAME=OrthoFi
+            RUNTIME_TAG=${{ matrix.runtime-tag }}
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
