@@ -67,7 +67,7 @@ jobs:
           images: ${{ steps.ecr.outputs.registry }}/${{ inputs.domain }}-api
           tags: |
             type=ref,event=branch,suffix=${{ matrix.suffix }}
-            type=sha,format=long
+            type=sha,format=long,suffix=${{ matrix.suffix }}
 
       - uses: docker/build-push-action@v3
         with:
