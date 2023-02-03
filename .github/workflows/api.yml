@@ -19,6 +19,18 @@ on:
         required: true
         type: string
 
+      arm-tag:
+        description: The arm tag to use e.g. 6.0-alpine3.16-arm64v8
+        default: 6.0-alpine3.16-arm64v8
+        required: false
+        type: string
+
+      main-tag:
+        description: The main, non-arm tag to use e.g. 6.0
+        default: "6.0"
+        required: false
+        type: string
+
     secrets:
       build-aws-access-key-id:
         description: secrets.BUILD_AWS_ACCESS_KEY_ID
@@ -43,10 +55,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - runtime-tag: 6.0-alpine3.16-arm64v8
+          - runtime-tag: ${{ inputs.arm-tag }}
             suffix: "-arm"
 
-          - runtime-tag: "6.0"
+          - runtime-tag: ${{ inputs.main-tag }}
 
     steps:
       - uses: actions/checkout@v3
