@@ -4,16 +4,26 @@ on:
     inputs:
       context:
         description: Docker Context
-        default: .
         required: true
         type: string
+
       dockerfile:
         description: Dockerfile location
-        default: Dockerfile
         required: true
         type: string
-      image-name:
-        description: Name of the published image
+
+      dotnet-tag:
+        description: The dotnet tag to pass to the Dockerfile e.g. 6.0-alpine3.16-arm64v8
+        required: false
+        type: string
+        
+      image-tag-suffix:
+        description: The image tag suffix e.g. -arm
+        required: false
+        type: string
+
+      repository:
+        description: ECR repository name
         required: true
         type: string
 
@@ -21,14 +31,17 @@ on:
       build-aws-access-key-id:
         description: secrets.BUILD_AWS_ACCESS_KEY_ID
         required: true
+
       build-aws-secret-access-key:
         description: secrets.BUILD_AWS_SECRET_ACCESS_KEY
         required: true
+
+      dev-build-role:
+        description: secrets.OCKERS_BUILD_ROLE
+        required: true
+
       github-token:
         description: secrets.BUILD_GITHUB_TOKEN
-        required: true
-      ockers-build-role:
-        description: secrets.OCKERS_BUILD_ROLE
         required: true
 
 jobs:
@@ -43,7 +56,7 @@ jobs:
           aws-access-key-id: ${{ secrets.build-aws-access-key-id }}
           aws-region: us-east-1
           aws-secret-access-key: ${{ secrets.build-aws-secret-access-key }}
-          role-to-assume: ${{ secrets.ockers-build-role }}
+          role-to-assume: ${{ secrets.dev-build-role }}
 
       - uses: aws-actions/amazon-ecr-login@v1
         id: ecr
@@ -51,16 +64,17 @@ jobs:
       - uses: docker/metadata-action@v4
         id: meta
         with:
-          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.image-name }}
+          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.repository }}
           tags: |
-            type=ref,event=branch
-            type=sha,format=long
+            type=ref,event=branch,suffix=${{ inputs.image-tag-suffix }}
+            type=sha,format=long,suffix=${{ inputs.image-tag-suffix }}
 
       - uses: docker/build-push-action@v3
         with:
           build-args: |
             GITHUB_TOKEN=${{ secrets.github-token }}
             GITHUB_USERNAME=OrthoFi
+            RUNTIME_TAG=${{ inputs.dotnet-tag }}
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
           labels: ${{ steps.meta.outputs.labels }}
