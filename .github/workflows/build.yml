@@ -27,23 +27,6 @@ on:
         required: true
         type: string
 
-    secrets:
-      build-aws-access-key-id:
-        description: secrets.BUILD_AWS_ACCESS_KEY_ID
-        required: true
-
-      build-aws-secret-access-key:
-        description: secrets.BUILD_AWS_SECRET_ACCESS_KEY
-        required: true
-
-      dev-build-role:
-        description: secrets.OCKERS_BUILD_ROLE
-        required: true
-
-      github-token:
-        description: secrets.BUILD_GITHUB_TOKEN
-        required: true
-
 jobs:
   build-image:
     name: Build Image
@@ -53,10 +36,10 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v1-node16
         with:
-          aws-access-key-id: ${{ secrets.build-aws-access-key-id }}
+          aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-region: us-east-1
-          aws-secret-access-key: ${{ secrets.build-aws-secret-access-key }}
-          role-to-assume: ${{ secrets.dev-build-role }}
+          aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.OCKERS_BUILD_ROLE }}
 
       - uses: aws-actions/amazon-ecr-login@v1
         id: ecr
@@ -72,7 +55,7 @@ jobs:
       - uses: docker/build-push-action@v3
         with:
           build-args: |
-            GITHUB_TOKEN=${{ secrets.github-token }}
+            GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }}
             GITHUB_USERNAME=OrthoFi
             RUNTIME_TAG=${{ inputs.dotnet-tag }}
           context: ${{ inputs.context }}
