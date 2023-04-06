@@ -12,11 +12,17 @@ on:
         required: true
         type: string
 
+      runs-on:
+        default: "['ubuntu-latest']"
+        description: Override the image to run on
+        required: false
+        type: string
+
       dotnet-tag:
         description: The dotnet tag to pass to the Dockerfile e.g. 6.0-alpine3.16-arm64v8
         required: false
         type: string
-        
+
       image-tag-suffix:
         description: The image tag suffix e.g. -arm
         required: false
@@ -30,7 +36,7 @@ on:
 jobs:
   build-image:
     name: Build Image
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(inputs.runs-on) }}
     steps:
       - uses: actions/checkout@v3
 
@@ -51,6 +57,8 @@ jobs:
           tags: |
             type=ref,event=branch,suffix=${{ inputs.image-tag-suffix }}
             type=sha,format=long,suffix=${{ inputs.image-tag-suffix }}
+
+      - uses: docker/setup-buildx-action@v2
 
       - uses: docker/build-push-action@v3
         with:
