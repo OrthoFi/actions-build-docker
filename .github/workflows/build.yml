@@ -12,31 +12,18 @@ on:
         required: true
         type: string
 
-      runs-on:
-        default: "['ubuntu-latest']"
-        description: Override the image to run on
-        required: false
-        type: string
-
-      dotnet-tag:
-        description: The dotnet tag to pass to the Dockerfile e.g. 6.0-alpine3.16-arm64v8
-        required: false
-        type: string
-
-      image-tag-suffix:
-        description: The image tag suffix e.g. -arm
-        required: false
-        type: string
-
-      image-name:
-        description: Name of the published image
+      repository:
+        description: ECR repository name
         required: true
         type: string
 
 jobs:
   build-image:
     name: Build Image
-    runs-on: ${{ fromJSON(inputs.runs-on) }}
+    strategy:
+      matrix:
+        platform: [x64, arm64]
+    runs-on: ${{ matrix.platform == 'arm64' && fromJSON('["self-hosted", "linux", "arm64"]') || fromJSON('["ubuntu-latest"]') }}
     steps:
       - uses: actions/checkout@v3
 
@@ -53,10 +40,10 @@ jobs:
       - uses: docker/metadata-action@v4
         id: meta
         with:
-          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.image-name }}
+          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.repository }}
           tags: |
-            type=ref,event=branch,suffix=${{ inputs.image-tag-suffix }}
-            type=sha,format=long,suffix=${{ inputs.image-tag-suffix }}
+            type=ref,event=branch,suffix=${{ matrix.platform == 'arm64' && '-arm' || '' }}
+            type=sha,format=long,suffix=${{ matrix.platform == 'arm64' && '-arm' || '' }}
 
       - uses: docker/setup-buildx-action@v2
 
@@ -65,7 +52,6 @@ jobs:
           build-args: |
             GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }}
             GITHUB_USERNAME=OrthoFi
-            RUNTIME_TAG=${{ inputs.dotnet-tag }}
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
           labels: ${{ steps.meta.outputs.labels }}
