@@ -2,6 +2,12 @@ name: Build Image
 on:
   workflow_call:
     inputs:
+      build-arm:
+        description: Build an arm64 image in addition to x64
+        required: false
+        default: true
+        type: boolean
+
       context:
         description: Docker Context
         required: true
@@ -18,11 +24,27 @@ on:
         type: string
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          echo "Determining hardware platforms for platform matrix values to pass to build-image job"
+          MATRIX_JSON="{\"platform\": [\"x64\""
+          if [[ "${{ inputs.build_arm }}" == "true" ]]; then
+            MATRIX_JSON="${MATRIX_JSON},\"arm64\""
+          fi
+          MATRIX_JSON="${MATRIX_JSON}]}"
+          echo Matrix for build-image job is $MATRIX_JSON
+          echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
+
   build-image:
     name: Build Image
+    needs: generate-matrix
     strategy:
-      matrix:
-        platform: [x64, arm64]
+      matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
     runs-on: ${{ matrix.platform == 'arm64' && fromJSON('["self-hosted", "linux", "arm64"]') || fromJSON('["ubuntu-latest"]') }}
     steps:
       - uses: actions/checkout@v3
