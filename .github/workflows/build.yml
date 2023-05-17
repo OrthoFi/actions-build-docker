@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "Determining hardware platforms for platform matrix values to pass to build-image job"
           MATRIX_JSON="{\"platform\": [\"x64\""
-          if [[ "${{ inputs.build_arm }}" == "true" ]]; then
+          if [[ "${{ inputs.build-arm }}" == "true" ]]; then
             MATRIX_JSON="${MATRIX_JSON},\"arm64\""
           fi
           MATRIX_JSON="${MATRIX_JSON}]}"
