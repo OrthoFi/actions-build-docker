@@ -30,6 +30,12 @@ on:
         default: "6.0"
         required: false
         type: string
+    
+      runs-on:
+        description: The what value to to use in the 'runs-on' parameter (e.g. ubuntu-latest, windows-latest, "[self-hosted, linux, arm64]")
+        default: ubuntu-latest
+        required: false
+        type: string
 
     secrets:
       build-aws-access-key-id:
@@ -51,7 +57,7 @@ on:
 jobs:
   build-image:
     name: Build Image
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     strategy:
       matrix:
         include:
