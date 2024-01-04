@@ -82,7 +82,7 @@ jobs:
       - uses: docker/metadata-action@v4
         id: meta
         with:
-          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.domain }}-api
+          images: 655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.domain }}-api
           tags: |
             type=ref,event=branch,suffix=${{ matrix.suffix }}
             type=sha,format=long,suffix=${{ matrix.suffix }}

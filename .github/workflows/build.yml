@@ -71,7 +71,7 @@ jobs:
       - uses: docker/metadata-action@v4
         id: meta
         with:
-          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.repository }}
+          images: 655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}
           tags: |
             type=ref,event=branch,suffix=${{ matrix.platform == 'arm64' && '-arm' || '' }}
             type=sha,format=long,suffix=${{ matrix.platform == 'arm64' && '-arm' || '' }}
@@ -115,23 +115,23 @@ jobs:
       - uses: docker/metadata-action@v4
         id: meta
         with:
-          images: ${{ steps.ecr.outputs.registry }}/${{ inputs.repository }}
+          images: 655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}
           tags: |
             type=ref,event=branch
             type=sha,format=long
       
       - name: Build docker image
         run: |
-          docker build -t "${{ steps.ecr.outputs.registry }}/${{ inputs.repository }}" --build-arg GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }} --build-arg GITHUB_USERNAME=OrthoFi -f ${{ inputs.dockerfile }} ${{ inputs.context }}
+          docker build -t "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" --build-arg GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }} --build-arg GITHUB_USERNAME=OrthoFi -f ${{ inputs.dockerfile }} ${{ inputs.context }}
       
       - name: Tag docker image
         run: |
           $tags = "${{ steps.meta.outputs.tags }}".split()
           foreach ($tag in $tags) {
-            docker tag "${{ steps.ecr.outputs.registry }}/${{ inputs.repository }}" "$tag"
+            docker tag "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" "$tag"
           }
         shell: pwsh
       
       - name: Push docker image
         run: |
-          docker push "${{ steps.ecr.outputs.registry }}/${{ inputs.repository }}" --all-tags
+          docker push "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" --all-tags
