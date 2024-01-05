@@ -18,11 +18,16 @@ on:
         required: true
         type: string
 
+      dotnet-tag:
+        description: The dotnet tag to pass to the Dockerfile e.g. 6.0-alpine3.16-arm64v8
+        required: false
+        type: string
+
       repository:
         description: ECR repository name
         required: true
         type: string
-      
+
       operating-system:
         description: What operating system is the docker image based on (e.g. linux, windows)
         default: linux
@@ -82,6 +87,7 @@ jobs:
           build-args: |
             GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }}
             GITHUB_USERNAME=OrthoFi
+            RUNTIME_TAG=${{ inputs.dotnet-tag }}
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -122,7 +128,7 @@ jobs:
       
       - name: Build docker image
         run: |
-          docker build -t "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" --build-arg GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }} --build-arg GITHUB_USERNAME=OrthoFi -f ${{ inputs.dockerfile }} ${{ inputs.context }}
+          docker build -t "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" --build-arg GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }} --build-arg GITHUB_USERNAME=OrthoFi --build-arg RUNTIME_TAG=${{ inputs.dotnet-tag }} -f ${{ inputs.dockerfile }} ${{ inputs.context }}
       
       - name: Tag docker image
         run: |
