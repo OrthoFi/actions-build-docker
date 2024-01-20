@@ -128,21 +128,23 @@ jobs:
       
       - name: Build docker image
         run: |
-          docker build \
-          -t "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" \
-          --build-arg GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }} \
-          --build-arg GITHUB_USERNAME=OrthoFi \
-          --build-arg MYGET_API_KEY=${{ secrets.MYGET_API_KEY }} \
-          --build-arg MYGET_USERNAME=${{ secrets.MYGET_USER }} \
-          --build-arg RUNTIME_TAG=${{ inputs.dotnet-tag }} \
+          docker build `
+          -t "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" `
+          --build-arg GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }} `
+          --build-arg GITHUB_USERNAME=OrthoFi `
+          --build-arg MYGET_API_KEY=${{ secrets.MYGET_API_KEY }} `
+          --build-arg MYGET_USERNAME=${{ secrets.MYGET_USER }} `
+          --build-arg RUNTIME_TAG=${{ inputs.dotnet-tag }} `
           -f ${{ inputs.dockerfile }} ${{ inputs.context }}
+        shell: pwsh
           
 
       - name: Tag docker image
         run: |
           $tags = "${{ steps.meta.outputs.tags }}".split()
           foreach ($tag in $tags) {
-            docker tag "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" "$tag"
+            if (!$tag) { continue }
+            docker tag "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}:$tag"
           }
         shell: pwsh
       
