@@ -144,7 +144,7 @@ jobs:
           $tags = "${{ steps.meta.outputs.tags }}".split()
           foreach ($tag in $tags) {
             if (!$tag) { continue }
-            docker tag "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}:$tag"
+            docker tag "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" "$tag"
           }
         shell: pwsh
       
