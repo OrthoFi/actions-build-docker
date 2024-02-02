@@ -44,26 +44,26 @@ jobs:
           - runtime-tag: ${{ inputs.main-tag }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v1-node16
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.BUILD_AWS_ACCESS_KEY_ID }}
           aws-region: us-east-1
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
           role-to-assume: ${{ secrets.BUILD_AWS_SHARED_SERVICES_ROLE }}
 
-      - uses: aws-actions/amazon-ecr-login@v1
+      - uses: aws-actions/amazon-ecr-login@v2
         id: ecr
 
-      - uses: docker/metadata-action@v4
+      - uses: docker/metadata-action@v5
         id: meta
         with:
           images: 655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.domain }}-api
           tags: |
             type=ref,event=branch,suffix=${{ matrix.suffix }}
             type=sha,format=long,suffix=${{ matrix.suffix }}
-      - uses: docker/build-push-action@v3
+      - uses: docker/build-push-action@v5
         with:
           build-args: |
             GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }}
