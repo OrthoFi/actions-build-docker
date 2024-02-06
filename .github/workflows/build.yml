@@ -114,8 +114,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.BUILD_AWS_SECRET_ACCESS_KEY }}
           role-to-assume: ${{ secrets.BUILD_AWS_SHARED_SERVICES_ROLE }}
       
-      - uses: aws-actions/amazon-ecr-login@v2
-        id: ecr
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 655438670330.dkr.ecr.us-east-1.amazonaws.com
       
       - uses: docker/metadata-action@v5
         id: meta
