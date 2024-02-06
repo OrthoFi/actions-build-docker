@@ -80,7 +80,6 @@ jobs:
           tags: |
             type=ref,event=branch,suffix=${{ matrix.platform == 'arm64' && '-arm' || '' }}
             type=sha,format=long,suffix=${{ matrix.platform == 'arm64' && '-arm' || '' }}
-      - uses: docker/setup-buildx-action@v3
 
       - uses: docker/build-push-action@v5
         with:
