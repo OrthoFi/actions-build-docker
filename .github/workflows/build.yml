@@ -99,12 +99,8 @@ jobs:
     runs-on: ["self-hosted", "windows", "x64"]
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Force docker to save credentials in config.json
-        run: |
-          Remove-Item -Path "C:\Program Files\Docker\Docker\resources\bin\docker-credential-desktop.exe" -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path "C:\Program Files\Docker\Docker\resources\bin\docker-credential-wincred.exe" -Force -ErrorAction SilentlyContinue
-        shell: pwsh
+        with:
+          fetch-depth: 1
       
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -114,7 +110,7 @@ jobs:
           role-to-assume: ${{ secrets.BUILD_AWS_SHARED_SERVICES_ROLE }}
       
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 655438670330.dkr.ecr.us-east-1.amazonaws.com
+        run: docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) 655438670330.dkr.ecr.us-east-1.amazonaws.com
       
       - uses: docker/metadata-action@v5
         id: meta
