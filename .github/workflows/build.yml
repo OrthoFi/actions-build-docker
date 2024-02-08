@@ -45,7 +45,7 @@ jobs:
       - id: set-matrix
         run: |
           echo "Determining hardware platforms for platform matrix values to pass to build-image job"
-          MATRIX_JSON="{\"platform\": [\"x64\""
+          MATRIX_JSON="{\"platform\": [\"amd64\""
           if [[ "${{ inputs.build-arm }}" == "true" ]]; then
             MATRIX_JSON="${MATRIX_JSON},\"arm64\""
           fi
@@ -90,6 +90,7 @@ jobs:
           context: ${{ inputs.context }}
           file: ${{ inputs.dockerfile }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: "linux/${{ matrix.platform }}"
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
