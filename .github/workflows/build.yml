@@ -145,3 +145,7 @@ jobs:
       - name: Push docker image
         run: |
           docker push "655438670330.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.repository }}" --all-tags
+
+      - name: Docker cleanup
+        run: |
+          docker system prune -f
