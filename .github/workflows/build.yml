@@ -94,6 +94,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
 
+      - name: Docker cleanup
+        run: |
+          docker system prune -f
+
   build-image-windows:
     name: Build Image on Windows
     if: inputs.operating-system == 'windows'
